@@ -9,49 +9,21 @@ const {
 const fetch = require("node-fetch");
 
 // ── Config ──────────────────────────────────────────────────────────────────────
-const DISCORD_TOKEN   = process.env.DISCORD_BOT_TOKEN;
-const SESSION_COOKIE  = process.env.LOGGED_TG_SESSION_COOKIE;
-const STATS_CHANNEL   = process.env.STATS_CHANNEL_ID ?? null;
-const PREFIX          = "!";
+const DISCORD_TOKEN  = process.env.DISCORD_BOT_TOKEN;
+const LOGGED_TG_ID   = process.env.LOGGED_TG_ID;
+const LOGGED_TG_TOKEN= process.env.LOGGED_TG_TOKEN;
+const STATS_CHANNEL  = process.env.STATS_CHANNEL_ID ?? null;
+const PREFIX         = "!";
 
-const SESSION_URL = "https://logged.tg/api/session";
-const API_BASE    = "https://api.injuries.to";
+const API_BASE = "https://api.injuries.to";
 
-// ── Auth helpers ────────────────────────────────────────────────────────────────
+// ── API helper ──────────────────────────────────────────────────────────────────
 
-async function getSession() {
-  if (!SESSION_COOKIE) throw new Error("LOGGED_TG_SESSION_COOKIE is not set.");
-
-  const res = await fetch(SESSION_URL, {
+async function apiGet(path) {
+  const res = await fetch(`${API_BASE}${path}`, {
     headers: {
-      Cookie:        SESSION_COOKIE,
-      "User-Agent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
-      Referer:       "https://logged.tg/dashboard",
-      Accept:        "application/json",
-    },
-  });
-
-  const text = await res.text();
-  console.log("[v0] Session status:", res.status);
-  console.log("[v0] Session response (first 500 chars):", text.slice(0, 500));
-
-  if (!res.ok) throw new Error(`Session fetch failed (${res.status}) — cookie may be expired.`);
-
-  let data;
-  try { data = JSON.parse(text); } catch { throw new Error(`Session returned non-JSON: ${text.slice(0, 200)}`); }
-
-  console.log("[v0] Session top-level keys:", Object.keys(data));
-  return data;
-}
-
-async function apiGet(path, id, token) {
-  const url = `${API_BASE}${path}`;
-  console.log("[v0] API GET:", url, "id:", id, "token:", token ? token.slice(0, 8) + "..." : "NONE");
-
-  const res = await fetch(url, {
-    headers: {
-      "x-id":         id,
-      "x-token":      token,
+      "x-id":         LOGGED_TG_ID,
+      "x-token":      LOGGED_TG_TOKEN,
       "content-type": "application/json; charset=utf-8",
       "User-Agent":   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
       Origin:         "https://logged.tg",
@@ -61,8 +33,6 @@ async function apiGet(path, id, token) {
   });
 
   const text = await res.text();
-  console.log("[v0] API", path, "status:", res.status, "response (first 500):", text.slice(0, 500));
-
   let json;
   try { json = JSON.parse(text); } catch { json = { raw: text }; }
 
@@ -73,55 +43,22 @@ async function apiGet(path, id, token) {
 // ── Stats fetcher ───────────────────────────────────────────────────────────────
 
 async function fetchStats() {
-  const sessionData = await getSession();
-
-  // Extract auth tokens from session
-  const authArr = sessionData?.Auth
-    ?? sessionData?.userSettings?.Auth
-    ?? sessionData?.user?.Auth
-    ?? null;
-
-  console.log("[v0] authArr:", JSON.stringify(authArr)?.slice(0, 100));
-
-  if (!authArr) throw new Error("Auth tokens not found in session — cookie may be expired.");
-
-  const id    = Array.isArray(authArr) ? String(authArr[0]) : String(authArr.Id ?? authArr.id ?? "");
-  const token = Array.isArray(authArr) ? String(authArr[1]) : String(authArr.Token ?? authArr.token ?? "");
-
-  if (!id || !token) throw new Error("Auth.Id or Auth.Token missing in session.");
-
-  console.log("[v0] Got auth id:", id, "token:", token.slice(0, 8) + "...");
-
-  // Try common dashboard/stats endpoints
-  let data;
-  for (const path of ["/api/auth", "/api/user", "/api/dashboard", "/v2/user", "/api/omni"]) {
-    try {
-      data = await apiGet(path, id, token);
-      if (data && !data.error && !data.message && Object.keys(data).length > 2) {
-        console.log("[v0] Got data from path:", path, "keys:", Object.keys(data));
-        break;
-      }
-    } catch (e) {
-      console.log("[v0] Path", path, "failed:", e.message);
-      data = null;
-    }
+  if (!LOGGED_TG_ID || !LOGGED_TG_TOKEN) {
+    throw new Error("LOGGED_TG_ID or LOGGED_TG_TOKEN is not set.");
   }
 
-  if (!data) throw new Error("Could not fetch stats from any endpoint. Check logs for details.");
-
-  const userSettings = sessionData?.userSettings ?? sessionData?.user ?? {};
+  const data = await apiGet("/api/auth");
 
   // Walk common response shapes
   const mainData     = data?.omniData?.Main ?? data?.Main ?? data?.data ?? data;
   const inner        = mainData?.Data ?? mainData;
   const profile      = data?.omniData?.Profile?.Header ?? data?.Profile?.Header ?? {};
+  const userSettings = data?.userSettings ?? data?.user ?? {};
   const totals       = inner?.Totals       ?? data?.Totals       ?? {};
   const collectibles = inner?.Collectibles ?? data?.Collectibles ?? {};
   const billing      = inner?.Billing      ?? data?.Billing      ?? {};
   const groups       = inner?.Groups       ?? data?.Groups       ?? {};
   const cookies      = inner?.Cookies      ?? data?.Cookies      ?? {};
-
-  console.log("[v0] totals:", JSON.stringify(totals));
 
   return {
     userName:     String(userSettings?.userName    ?? profile?.Username    ?? "Unknown"),
@@ -305,8 +242,8 @@ if (!DISCORD_TOKEN) {
   console.error("[logged.tg bot] ERROR: DISCORD_BOT_TOKEN is not set.");
   process.exit(1);
 }
-if (!SESSION_COOKIE) {
-  console.error("[logged.tg bot] ERROR: LOGGED_TG_SESSION_COOKIE is not set.");
+if (!LOGGED_TG_ID || !LOGGED_TG_TOKEN) {
+  console.error("[logged.tg bot] ERROR: LOGGED_TG_ID or LOGGED_TG_TOKEN is not set.");
   process.exit(1);
 }
 
