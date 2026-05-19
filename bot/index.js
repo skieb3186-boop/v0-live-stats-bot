@@ -96,24 +96,19 @@ client.on("messageCreate", async (message) => {
   // Build the embed that prompts the user to submit a link
   const embed = new EmbedBuilder()
     .setColor(0x5865f2)
-    .setTitle("Hide a Link with Hyperlink")
     .setDescription(
-      "Want to disguise a long URL as a clean hyperlink?\n\n" +
-      "Click **Submit Link** below, paste your URL, and the bot will return a formatted hyperlink you can share anywhere."
+      "**─── <a:glowingcross:1462280458413801626> `ɪɴꜱᴀɴɪᴛʏ   | ʜʏᴘᴇʀʟɪɴᴋ` <a:glowingcross:1462280458413801626> ───\n\n" +
+      "<a:emoji_3:1500695831169204295> ʜɪᴅᴇꜱ ʏᴏᴜʀ ʟɪɴᴋ ᴛᴏ ᴍᴀᴋᴇ ɪᴛ ᴏʀɪɢɪɴᴀʟ\n\n" +
+      "<:emoji_4:1501269124330950787> ʙᴇꜱᴛ ʜʏᴘᴇʀʟɪɴᴋ ᴏꜰ ᴀʟʟ ᴛɪᴍᴇ**"
     )
-    .addFields(
-      { name: "How it works", value: "Your URL is posted to **linkurlshort.page.gd** and returned as a masked hyperlink.", inline: false },
-      { name: "Privacy", value: "The link is visible only to you in this message reply.", inline: false }
-    )
-    .setFooter({ text: "Powered by linkurlshort.page.gd" })
-    .setTimestamp();
+    .setImage("https://image2url.com/r2/default/gifs/1768488617981-bdc4c780-144f-4a40-8906-ddf01eadb705.gif");
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("hyperlink_submit")
-      .setLabel("Submit Link")
+      .setLabel("ʜʏᴘᴇʀʟɪɴᴋ")
       .setStyle(ButtonStyle.Primary)
-      .setEmoji("🔗")
+      .setEmoji({ id: "1500695831169204295", name: "emoji_3", animated: true })
   );
 
   await message.reply({ embeds: [embed], components: [row] });
