@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 // ── Discord color palette ────────────────────────────────────────────────────────
 const DC = {
@@ -63,6 +63,15 @@ const PROMPT_DESC =
   "<:emoji_4:1501269124330950787> ʙᴇꜱᴛ ʜʏᴘᴇʀʟɪɴᴋ ᴏꜰ ᴀʟʟ ᴛɪᴍᴇ**";
 
 export default function DiscordEmbedMockup() {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(EXAMPLE_FMT).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   return (
     <div className="space-y-3 font-sans">
 
@@ -72,15 +81,12 @@ export default function DiscordEmbedMockup() {
         style={{ backgroundColor: DC.bg, borderLeft: `4px solid ${DC.codeBg}` }}
       >
         <div className="p-3 pb-2">
-          {/* Description — bold wrapper + emoji rendering */}
           <p
             style={{ color: DC.body, fontWeight: 600 }}
             className="text-xs leading-relaxed"
           >
             {parseEmoji(PROMPT_DESC.replace(/\*\*/g, ""))}
           </p>
-
-          {/* Large GIF image */}
           <div className="mt-3 rounded overflow-hidden">
             <img
               src={GIF_URL}
@@ -90,8 +96,6 @@ export default function DiscordEmbedMockup() {
             />
           </div>
         </div>
-
-        {/* Button with animated emoji */}
         <div className="px-3 pb-3 pt-1">
           <button
             className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded cursor-default select-none"
@@ -110,20 +114,54 @@ export default function DiscordEmbedMockup() {
         </div>
       </div>
 
-      {/* ── Result: plain message (no embed) ── */}
-      <div className="max-w-md space-y-1">
-        <p className="text-sm font-bold" style={{ color: DC.title }}>
-          ʟɪɴᴋ ʜɪᴅᴇ ᴄᴏᴘʏ ᴀɴᴅ ꜱʜᴀʀᴇ
-        </p>
-        <pre
-          className="text-xs font-mono p-2 rounded break-all whitespace-pre-wrap"
-          style={{ backgroundColor: DC.codeBg, color: DC.body }}
-        >
-          {EXAMPLE_FMT}
-        </pre>
-        <p className="text-xs" style={{ color: DC.muted }}>
-          Requested by exampleuser
-        </p>
+      {/* ── Result embed (shown after modal submit) ── */}
+      <div
+        className="rounded overflow-hidden max-w-md"
+        style={{ backgroundColor: DC.bg, borderLeft: `4px solid ${DC.border}` }}
+      >
+        <div className="p-3 space-y-2">
+          {/* Title */}
+          <p className="text-sm font-bold" style={{ color: DC.title }}>
+            ʟɪɴᴋ ʜɪᴅᴇ ᴄᴏᴘʏ ᴀɴᴅ ꜱʜᴀʀᴇ
+          </p>
+
+          {/* Formatted output — single backtick inline code style + copy button */}
+          <div className="flex items-start gap-2">
+            <code
+              className="flex-1 text-xs font-mono px-2 py-1.5 rounded break-all"
+              style={{ backgroundColor: DC.codeBg, color: DC.body }}
+            >
+              {EXAMPLE_FMT}
+            </code>
+            <button
+              onClick={handleCopy}
+              className="shrink-0 text-xs font-semibold px-2.5 py-1.5 rounded transition-colors"
+              style={{
+                backgroundColor: copied ? "#57f287" : DC.primary,
+                color: "#fff",
+              }}
+            >
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+
+          {/* Instruction text */}
+          <p className="text-xs italic" style={{ color: DC.muted }}>
+            ʀᴇᴍᴏᴠᴇ ᴛʜᴇ{" "}
+            <code
+              className="px-1 rounded not-italic"
+              style={{ backgroundColor: DC.codeBg, color: DC.body }}
+            >
+              [
+            </code>
+            {" "}ʙᴇꜰᴏʀᴇ ᴀɴᴅ ᴀꜰᴛᴇʀ ᴛʜᴇ ʙʀᴀᴄᴋᴇᴛ
+          </p>
+
+          {/* Footer */}
+          <p className="text-[11px] pt-1 border-t" style={{ color: DC.muted, borderColor: DC.codeBg }}>
+            Requested by exampleuser
+          </p>
+        </div>
       </div>
 
     </div>

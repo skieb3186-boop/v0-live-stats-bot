@@ -181,10 +181,17 @@ client.on("interactionCreate", async (interaction) => {
       const fmt      = fmtMatch[1].replace(/\\\//g, "/");
       const shortUrl = shortMatch[1].replace(/\\\//g, "/");
 
-      // Reply as a plain message — no embed
-      await interaction.editReply({
-        content: `**ʟɪɴᴋ ʜɪᴅᴇ ᴄᴏᴘʏ ᴀɴᴅ ꜱʜᴀʀᴇ**\n\`\`\`${fmt}\`\`\`\n-# Requested by ${interaction.user.username}`,
-      });
+      // Build result embed
+      const resultEmbed = new EmbedBuilder()
+        .setColor(0x5865f2)
+        .setDescription(
+          `**ʟɪɴᴋ ʜɪᴅᴇ ᴄᴏᴘʏ ᴀɴᴅ ꜱʜᴀʀᴇ**\n\n` +
+          `\`${fmt}\`\n\n` +
+          `*ʀᴇᴍᴏᴠᴇ ᴛʜᴇ \`[\` ʙᴇꜰᴏʀᴇ ᴀɴᴅ ᴀꜰᴛᴇʀ ᴛʜᴇ ʙʀᴀᴄᴋᴇᴛ*`
+        )
+        .setFooter({ text: `Requested by ${interaction.user.username}` });
+
+      await interaction.editReply({ embeds: [resultEmbed] });
     } catch (err) {
       console.error("[bot] hyperlink error:", err.message);
       await interaction.editReply({
