@@ -100,42 +100,44 @@ client.on("interactionCreate", async (interaction) => {
     await interaction.deferReply({ ephemeral: false });
 
     try {
-      // POST to linkurlshort.page.gd
       const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
 
-      const res = await fetch(`${SHORT_API_BASE}/api/shorten`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ url: rawUrl }),
+      // The site is form-based — POST as URL-encoded form data
+      const res = await fetch(`${SHORT_API_BASE}/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent": "Mozilla/5.0 (compatible; HyperlinkBot/1.0)",
+        },
+        body: new URLSearchParams({ url: rawUrl }).toString(),
       });
 
-      let shortUrl = null;
-      let displayText = null;
+      const html = await res.text();
 
-      if (res.ok) {
-        const data = await res.json().catch(() => null);
-        // Common response shapes: { short_url }, { shortUrl }, { url }, { result }
-        shortUrl = data?.short_url || data?.shortUrl || data?.url || data?.result || null;
+      // Extract the short URL from the returned HTML
+      const shortUrlMatch = html.match(/https?:\/\/linkurlshort\.page\.gd\/index\.php\?r=[A-Za-z0-9]+/);
+      const shortUrl = shortUrlMatch ? shortUrlMatch[0] : null;
+
+      if (!shortUrl) {
+        await interaction.editReply({
+          content: "Could not shorten that link. Please check the URL and try again.",
+        });
+        return;
       }
 
-      // Fallback: even if API fails, wrap the original URL in a hyperlink format
-      const targetUrl = shortUrl || rawUrl;
-      displayText     = shortUrl ? "Click here (hidden link)" : "Click here";
+      // Formatted output exactly as the site shows it
+      const formattedOutput = `[${rawUrl}](${shortUrl})`;
 
       const resultEmbed = new EmbedBuilder()
-        .setColor(shortUrl ? 0x57f287 : 0xfee75c)
-        .setTitle(shortUrl ? "Your hyperlink is ready!" : "Hyperlink Created (original URL)")
-        .setDescription(
-          `Here is your disguised hyperlink:\n\n` +
-          `**[${displayText}](${targetUrl})**\n\n` +
-          `Copy the markdown above and paste it in any Discord message to show a masked link.`
-        )
+        .setColor(0x5865f2)
+        .setTitle("Link Shortened")
+        .setDescription("Ready to copy and share")
         .addFields(
-          { name: "Original URL", value: `\`${rawUrl}\``, inline: false },
-          { name: "Short / Hidden URL", value: `\`${targetUrl}\``, inline: false },
-          { name: "Markdown to copy", value: `\`\`\`[${displayText}](${targetUrl})\`\`\``, inline: false }
+          { name: "Formatted Output", value: `\`\`\`\n${formattedOutput}\n\`\`\``, inline: false },
+          { name: "Short URL", value: shortUrl, inline: false },
+          { name: "Original URL", value: rawUrl, inline: false }
         )
-        .setFooter({ text: `Requested by ${interaction.user.username} • linkurlshort.page.gd` })
+        .setFooter({ text: "Powered by linkurlshort.page.gd" })
         .setTimestamp();
 
       await interaction.editReply({ embeds: [resultEmbed] });
