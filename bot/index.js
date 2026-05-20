@@ -12,6 +12,9 @@ const {
   TextInputBuilder,
   TextInputStyle,
   InteractionType,
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  ChannelType,
 } = require("discord.js");
 
 // ── Config ──────────────────────────────────────────────────────────────────────
@@ -85,9 +88,30 @@ const client = new Client({
   ],
 });
 
-client.once("ready", () => {
+client.once("ready", async () => {
   console.log(`[bot] Online as ${client.user.tag}`);
   client.user.setActivity("!hyperlink", { type: ActivityType.Listening });
+
+  // Register /announce slash command globally
+  const announceCommand = new SlashCommandBuilder()
+    .setName("announce")
+    .setDescription("Send a custom embed announcement to a channel")
+    .addChannelOption((opt) =>
+      opt
+        .setName("channel")
+        .setDescription("Channel to send the announcement in")
+        .addChannelTypes(ChannelType.GuildText)
+        .setRequired(true)
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    .toJSON();
+
+  try {
+    await client.application.commands.set([announceCommand]);
+    console.log("[bot] Slash commands registered.");
+  } catch (err) {
+    console.error("[bot] Failed to register slash commands:", err.message);
+  }
 });
 
 // ── Welcomer ────────────────────────────────────────────────────────────────────
@@ -147,6 +171,113 @@ client.on("messageCreate", async (message) => {
 
 // ── Button / Modal interactions ─────────────────────────────────────────────────
 client.on("interactionCreate", async (interaction) => {
+
+  // ── /announce slash command — open the announce modal ──
+  if (interaction.isChatInputCommand() && interaction.commandName === "announce") {
+    const targetChannel = interaction.options.getChannel("channel");
+
+    const modal = new ModalBuilder()
+      .setCustomId(`announce_modal:${targetChannel.id}`)
+      .setTitle("Create Announcement Embed");
+
+    const titleInput = new TextInputBuilder()
+      .setCustomId("ann_title")
+      .setLabel("Title (optional)")
+      .setStyle(TextInputStyle.Short)
+      .setPlaceholder("e.g. Server Update")
+      .setRequired(false);
+
+    const bodyInput = new TextInputBuilder()
+      .setCustomId("ann_body")
+      .setLabel("Body / Description")
+      .setStyle(TextInputStyle.Paragraph)
+      .setPlaceholder("Write your announcement here...")
+      .setRequired(true);
+
+    const footerInput = new TextInputBuilder()
+      .setCustomId("ann_footer")
+      .setLabel("Footer text (optional)")
+      .setStyle(TextInputStyle.Short)
+      .setPlaceholder("e.g. Insanity Network")
+      .setRequired(false);
+
+    const imageInput = new TextInputBuilder()
+      .setCustomId("ann_image")
+      .setLabel("Image URL (optional, shown as large image)")
+      .setStyle(TextInputStyle.Short)
+      .setPlaceholder("https://example.com/banner.gif")
+      .setRequired(false);
+
+    const colorInput = new TextInputBuilder()
+      .setCustomId("ann_color")
+      .setLabel("Embed color hex (optional, e.g. #5865F2)")
+      .setStyle(TextInputStyle.Short)
+      .setPlaceholder("#5865F2")
+      .setRequired(false);
+
+    modal.addComponents(
+      new ActionRowBuilder().addComponents(titleInput),
+      new ActionRowBuilder().addComponents(bodyInput),
+      new ActionRowBuilder().addComponents(footerInput),
+      new ActionRowBuilder().addComponents(imageInput),
+      new ActionRowBuilder().addComponents(colorInput),
+    );
+
+    await interaction.showModal(modal);
+    return;
+  }
+
+  // ── /announce modal submitted ──
+  if (
+    interaction.type === InteractionType.ModalSubmit &&
+    interaction.customId.startsWith("announce_modal:")
+  ) {
+    const channelId = interaction.customId.split(":")[1];
+    const targetChannel = interaction.guild.channels.cache.get(channelId);
+
+    if (!targetChannel || !targetChannel.isTextBased()) {
+      await interaction.reply({ content: "Could not find the target channel.", ephemeral: true });
+      return;
+    }
+
+    const annTitle  = interaction.fields.getTextInputValue("ann_title").trim();
+    const annBody   = interaction.fields.getTextInputValue("ann_body").trim();
+    const annFooter = interaction.fields.getTextInputValue("ann_footer").trim();
+    const annImage  = interaction.fields.getTextInputValue("ann_image").trim();
+    const annColor  = interaction.fields.getTextInputValue("ann_color").trim();
+
+    const embed = new EmbedBuilder().setDescription(annBody);
+
+    if (annTitle)  embed.setTitle(annTitle);
+    if (annImage)  embed.setImage(annImage);
+
+    // Parse hex color — fallback to Discord blurple
+    if (annColor) {
+      const hex = parseInt(annColor.replace("#", ""), 16);
+      if (!isNaN(hex)) embed.setColor(hex);
+    }
+
+    // Footer: always include requester avatar
+    const footerText = annFooter
+      ? `${annFooter} • Announced by ${interaction.user.username}`
+      : `Announced by ${interaction.user.username}`;
+
+    embed.setFooter({
+      text: footerText,
+      iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+    });
+
+    embed.setTimestamp();
+
+    await targetChannel.send({ embeds: [embed] });
+
+    await interaction.reply({
+      content: `Announcement sent to <#${channelId}>.`,
+      ephemeral: true,
+    });
+    return;
+  }
+
   // ── Button pressed: open modal ──
   if (interaction.isButton() && interaction.customId === "hyperlink_submit") {
     const modal = new ModalBuilder()
