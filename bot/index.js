@@ -79,19 +79,7 @@ async function getSolvedCookie(fetch) {
 const WELCOME_CHANNEL_ID = "1506536157016494140";
 const WELCOME_GIF        = "https://image2url.com/r2/default/gifs/1768488617981-bdc4c780-144f-4a40-8906-ddf01eadb705.gif";
 
-// ── Startup lock — refuse to run if another instance already holds the lock ──────
-// Uses a TCP server on a fixed local port. If the port is already taken, this
-// process is a duplicate and must exit immediately.
-const net = require("net");
-const LOCK_PORT = 47123;
-const lockServer = net.createServer();
-lockServer.listen(LOCK_PORT, "127.0.0.1", () => {
-  console.log(`[bot] Instance lock acquired on port ${LOCK_PORT}. Starting bot...`);
-});
-lockServer.on("error", () => {
-  console.error("[bot] Another instance is already running. Exiting to prevent duplicate responses.");
-  process.exit(0);
-});
+
 
 const client = new Client({
   intents: [
@@ -100,6 +88,10 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
   ],
+  // Force Discord to close any existing session for this token before opening a new one.
+  // This prevents old Railway deployments from staying connected and duplicating responses.
+  ws: { large_threshold: 50 },
+  closeTimeout: 5_000,
 });
 
 client.once("ready", async () => {
@@ -371,30 +363,22 @@ function buildServerRows(servers) {
   return rows;
 }
 
-// ── Cross-process deduplication via /tmp lock files ─────────────────────────────
-// Because Railway may briefly run two instances during a deploy, we use exclusive
-// file creation in /tmp to ensure only ONE process handles each message/interaction.
-const fs = require("fs");
-
-function tryLock(id) {
-  const file = `/tmp/bot_lock_${id}`;
-  try {
-    // wx = exclusive create — fails if file already exists
-    fs.writeFileSync(file, process.pid.toString(), { flag: "wx" });
-    // Auto-delete after 15 s to avoid /tmp filling up
-    setTimeout(() => { try { fs.unlinkSync(file); } catch (_) {} }, 15_000);
-    return true;  // this process owns the lock
-  } catch (_) {
-    return false; // another process already handled it
+// ── In-process dedup (guards against event firing twice within same process) ──────
+const _handled = new Map();
+function alreadyHandled(id) {
+  if (_handled.has(id)) return true;
+  _handled.set(id, Date.now());
+  // Evict entries older than 30 s to keep memory clean
+  for (const [k, t] of _handled) {
+    if (Date.now() - t > 30_000) _handled.delete(k);
   }
+  return false;
 }
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.guild)     return;
-
-  // Only one process handles each message
-  if (!tryLock(`msg_${message.id}`)) return;
+  if (alreadyHandled(message.id)) return;
 
   const content = message.content.trim().toLowerCase();
 
@@ -425,7 +409,7 @@ client.on("messageCreate", async (message) => {
   const embed = new EmbedBuilder()
     .setDescription(
       "**─── <:emoji_1:1500680900428435646> `ɪɴꜱᴀɴɪᴛʏ   | ʜʏᴘᴇʀʟɪɴᴋ` <:emoji_1:1500680900428435646> ───\n\n" +
-      "<a:emoji_3:1500695831169204295> ᴜꜱᴇ ᴛʜɪꜱ ᴛᴏᴏʟ ᴛᴏ ɢᴇɴᴇʀᴀᴛᴇ ʜʏᴘᴇʀʟɪɴᴋꜱ ᴛʜᴀᴛ ʙʏᴘᴀꜱꜱ ᴅɪꜱᴄᴏʀᴅ ᴡᴀʀɴɪɴɢꜱ\n\n" +
+      "<a:emoji_3:1500695831169204295> ᴜꜱᴇ ᴛʜɪꜱ ᴛᴏᴏʟ ᴛᴏ ɢᴇɴᴇʀᴀᴛᴇ ʜʏᴘᴇʀʟɪɴᴋꜱ ᴛʜᴀᴛ ʙʏᴘᴀꜱꜱ ᴅɪꜱᴄ��ʀᴅ ᴡᴀʀɴɪɴɢꜱ\n\n" +
       "<:emoji_4:1501269124330950787> ʙᴇꜱᴛ ʜʏᴘᴇʀʟɪɴᴋ ᴏꜰ ᴀʟʟ ᴛɪᴍᴇ**"
     )
     .setImage("https://image2url.com/r2/default/gifs/1768488617981-bdc4c780-144f-4a40-8906-ddf01eadb705.gif")
@@ -447,7 +431,7 @@ client.on("messageCreate", async (message) => {
 
 // ── Button / Modal interactions ─────────────────────────────────────────────────
 client.on("interactionCreate", async (interaction) => {
-  if (!tryLock(`int_${interaction.id}`)) return;
+  if (alreadyHandled(interaction.id)) return;
 
   // ── /announce slash command — open the announce modal ──
   if (interaction.isChatInputCommand() && interaction.commandName === "announce") {
