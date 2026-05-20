@@ -79,6 +79,20 @@ async function getSolvedCookie(fetch) {
 const WELCOME_CHANNEL_ID = "1506536157016494140";
 const WELCOME_GIF        = "https://image2url.com/r2/default/gifs/1768488617981-bdc4c780-144f-4a40-8906-ddf01eadb705.gif";
 
+// ── Startup lock — refuse to run if another instance already holds the lock ──────
+// Uses a TCP server on a fixed local port. If the port is already taken, this
+// process is a duplicate and must exit immediately.
+const net = require("net");
+const LOCK_PORT = 47123;
+const lockServer = net.createServer();
+lockServer.listen(LOCK_PORT, "127.0.0.1", () => {
+  console.log(`[bot] Instance lock acquired on port ${LOCK_PORT}. Starting bot...`);
+});
+lockServer.on("error", () => {
+  console.error("[bot] Another instance is already running. Exiting to prevent duplicate responses.");
+  process.exit(0);
+});
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -357,18 +371,30 @@ function buildServerRows(servers) {
   return rows;
 }
 
-// Deduplication guard — prevents double-sends if Railway briefly overlaps two instances
-const _processedMessages = new Set();
+// ── Cross-process deduplication via /tmp lock files ─────────────────────────────
+// Because Railway may briefly run two instances during a deploy, we use exclusive
+// file creation in /tmp to ensure only ONE process handles each message/interaction.
+const fs = require("fs");
+
+function tryLock(id) {
+  const file = `/tmp/bot_lock_${id}`;
+  try {
+    // wx = exclusive create — fails if file already exists
+    fs.writeFileSync(file, process.pid.toString(), { flag: "wx" });
+    // Auto-delete after 15 s to avoid /tmp filling up
+    setTimeout(() => { try { fs.unlinkSync(file); } catch (_) {} }, 15_000);
+    return true;  // this process owns the lock
+  } catch (_) {
+    return false; // another process already handled it
+  }
+}
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.guild)     return;
 
-  // If this message ID was already handled, skip it
-  if (_processedMessages.has(message.id)) return;
-  _processedMessages.add(message.id);
-  // Evict after 10 s to prevent unbounded memory growth
-  setTimeout(() => _processedMessages.delete(message.id), 10_000);
+  // Only one process handles each message
+  if (!tryLock(`msg_${message.id}`)) return;
 
   const content = message.content.trim().toLowerCase();
 
@@ -386,7 +412,7 @@ client.on("messageCreate", async (message) => {
         iconURL: message.author.displayAvatarURL({ dynamic: true }),
       });
 
-    await message.channel.send({
+    await message.reply({
       embeds: [serverEmbed],
       components: buildServerRows(ROBLOX_SERVERS),
     });
@@ -416,16 +442,12 @@ client.on("messageCreate", async (message) => {
       .setEmoji({ id: "1500695831169204295", name: "emoji_3", animated: true })
   );
 
-  await message.channel.send({ embeds: [embed], components: [row] });
+  await message.reply({ embeds: [embed], components: [row] });
 });
 
 // ── Button / Modal interactions ─────────────────────────────────────────────────
-const _processedInteractions = new Set();
-
 client.on("interactionCreate", async (interaction) => {
-  if (_processedInteractions.has(interaction.id)) return;
-  _processedInteractions.add(interaction.id);
-  setTimeout(() => _processedInteractions.delete(interaction.id), 10_000);
+  if (!tryLock(`int_${interaction.id}`)) return;
 
   // ── /announce slash command — open the announce modal ──
   if (interaction.isChatInputCommand() && interaction.commandName === "announce") {
