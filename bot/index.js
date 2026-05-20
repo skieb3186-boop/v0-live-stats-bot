@@ -137,12 +137,98 @@ client.on("guildMemberAdd", async (member) => {
   });
 });
 
-// ── !hyperlink command ──────────────────────────────────────────────────────────
+// ── !server — Roblox server list ────────────────────────────────────────────────
+// 30 categories, each with a label and 3 invite links
+const ROBLOX_SERVERS = [
+  { id: "psx",         label: "PSX",              invites: ["https://discord.gg/psx", "https://discord.gg/psx2", "https://discord.gg/psx3"] },
+  { id: "adoptme",     label: "Adopt Me",          invites: ["https://discord.gg/adoptme", "https://discord.gg/adoptme2", "https://discord.gg/adoptme3"] },
+  { id: "bloxfruits",  label: "Blox Fruits",       invites: ["https://discord.gg/bloxfruits", "https://discord.gg/bloxfruits2", "https://discord.gg/bloxfruits3"] },
+  { id: "mm2",         label: "MM2",               invites: ["https://discord.gg/mm2", "https://discord.gg/mm22", "https://discord.gg/mm23"] },
+  { id: "pet99",       label: "Pet Sim 99",        invites: ["https://discord.gg/petsim99", "https://discord.gg/petsim992", "https://discord.gg/petsim993"] },
+  { id: "royalhigh",   label: "Royal High",        invites: ["https://discord.gg/royalhigh", "https://discord.gg/royalhigh2", "https://discord.gg/royalhigh3"] },
+  { id: "brookhaven",  label: "Brookhaven",        invites: ["https://discord.gg/brookhaven", "https://discord.gg/brookhaven2", "https://discord.gg/brookhaven3"] },
+  { id: "arsenal",     label: "Arsenal",           invites: ["https://discord.gg/arsenal", "https://discord.gg/arsenal2", "https://discord.gg/arsenal3"] },
+  { id: "jailbreak",   label: "Jailbreak",         invites: ["https://discord.gg/jailbreak", "https://discord.gg/jailbreak2", "https://discord.gg/jailbreak3"] },
+  { id: "towerofhell", label: "Tower of Hell",     invites: ["https://discord.gg/towerofhell", "https://discord.gg/towerofhell2", "https://discord.gg/towerofhell3"] },
+  { id: "minecraftian",label: "Minecraftian",      invites: ["https://discord.gg/minecraftian", "https://discord.gg/minecraftian2", "https://discord.gg/minecraftian3"] },
+  { id: "bedwars",     label: "Bedwars",           invites: ["https://discord.gg/bedwars", "https://discord.gg/bedwars2", "https://discord.gg/bedwars3"] },
+  { id: "murder",      label: "Murder Mystery",    invites: ["https://discord.gg/murder", "https://discord.gg/murder2", "https://discord.gg/murder3"] },
+  { id: "piggy",       label: "Piggy",             invites: ["https://discord.gg/piggy", "https://discord.gg/piggy2", "https://discord.gg/piggy3"] },
+  { id: "ninjalegs",   label: "Ninja Legends",     invites: ["https://discord.gg/ninjalegs", "https://discord.gg/ninjalegs2", "https://discord.gg/ninjalegs3"] },
+  { id: "dragon",      label: "Dragon Adventures", invites: ["https://discord.gg/dragon", "https://discord.gg/dragon2", "https://discord.gg/dragon3"] },
+  { id: "islands",     label: "Islands",           invites: ["https://discord.gg/islands", "https://discord.gg/islands2", "https://discord.gg/islands3"] },
+  { id: "vehicle",     label: "Vehicle Legends",   invites: ["https://discord.gg/vehicle", "https://discord.gg/vehicle2", "https://discord.gg/vehicle3"] },
+  { id: "lumber",      label: "Lumber Tycoon",     invites: ["https://discord.gg/lumber", "https://discord.gg/lumber2", "https://discord.gg/lumber3"] },
+  { id: "skyblock",    label: "Skyblock",          invites: ["https://discord.gg/skyblock", "https://discord.gg/skyblock2", "https://discord.gg/skyblock3"] },
+  { id: "tradingblox", label: "Trading (Blox)",    invites: ["https://discord.gg/tradingblox", "https://discord.gg/tradingblox2", "https://discord.gg/tradingblox3"] },
+  { id: "funnymoments",label: "Funny Moments",     invites: ["https://discord.gg/funnymoments", "https://discord.gg/funnymoments2", "https://discord.gg/funnymoments3"] },
+  { id: "flicker",     label: "Flicker",           invites: ["https://discord.gg/flicker", "https://discord.gg/flicker2", "https://discord.gg/flicker3"] },
+  { id: "robux",       label: "Robux Groups",      invites: ["https://discord.gg/robux", "https://discord.gg/robux2", "https://discord.gg/robux3"] },
+  { id: "swordburst",  label: "Sword Burst",       invites: ["https://discord.gg/swordburst", "https://discord.gg/swordburst2", "https://discord.gg/swordburst3"] },
+  { id: "shindo",      label: "Shindo Life",       invites: ["https://discord.gg/shindo", "https://discord.gg/shindo2", "https://discord.gg/shindo3"] },
+  { id: "deepwoken",   label: "Deepwoken",         invites: ["https://discord.gg/deepwoken", "https://discord.gg/deepwoken2", "https://discord.gg/deepwoken3"] },
+  { id: "doors",       label: "Doors",             invites: ["https://discord.gg/doors", "https://discord.gg/doors2", "https://discord.gg/doors3"] },
+  { id: "evade",       label: "Evade",             invites: ["https://discord.gg/evade", "https://discord.gg/evade2", "https://discord.gg/evade3"] },
+  { id: "fightingleg", label: "Fighting Legends",  invites: ["https://discord.gg/fightingleg", "https://discord.gg/fightingleg2", "https://discord.gg/fightingleg3"] },
+];
+
+// Build button rows (max 5 buttons per row, max 5 rows per message = 25 per message)
+function buildServerRows(servers) {
+  const rows = [];
+  for (let i = 0; i < servers.length; i += 5) {
+    const chunk = servers.slice(i, i + 5);
+    const row = new ActionRowBuilder().addComponents(
+      chunk.map((s) =>
+        new ButtonBuilder()
+          .setCustomId(`server_${s.id}`)
+          .setLabel(s.label)
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji({ id: "1500695831169204295", name: "emoji_3", animated: true })
+      )
+    );
+    rows.push(row);
+  }
+  return rows;
+}
+
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.guild)     return;
 
   const content = message.content.trim().toLowerCase();
+
+  // ── !server ──
+  if (content === `${PREFIX}server`) {
+    const serverEmbed = new EmbedBuilder()
+      .setDescription(
+        "**─── <a:emoji_8:1506236357775720548> `ɪɴꜱᴀɴɪᴛʏ   | ꜱᴇʀᴠᴇʀꜱ` <a:emoji_8:1506236357775720548> ───\n\n" +
+        "<a:emoji_3:1500695831169204295> ꜱᴇʀᴠᴇʀꜱ ᴜ ᴡᴀɴᴛ ᴛᴏ ʜɪᴛ/ʙᴇᴀᴍ ɪɴ\n\n" +
+        "<:emoji_4:1501269124330950787> ᴀʟʟ ꜱᴇʀᴠᴇʀꜱ ʟᴏꜱᴛ ᴛᴏ ʙᴇᴀᴍ**"
+      )
+      .setImage("https://cdn.discordapp.com/attachments/1500676577183268914/1506552431855800391/5dba8cbd-8441-48ae-8b64-5e8f39555b90.gif?ex=6a0eadca&is=6a0d5c4a&hm=3e5d2141bbf449b3a387bb54e8b085b069e22815670186aa65fb1aef191fc055&")
+      .setFooter({
+        text: `Requested by ${message.author.username}`,
+        iconURL: message.author.displayAvatarURL({ dynamic: true }),
+      });
+
+    // First 25 servers (5 rows)
+    const firstBatch  = ROBLOX_SERVERS.slice(0, 25);
+    // Last 5 servers (1 row) — sent as a follow-up
+    const secondBatch = ROBLOX_SERVERS.slice(25);
+
+    await message.reply({
+      embeds: [serverEmbed],
+      components: buildServerRows(firstBatch),
+    });
+
+    if (secondBatch.length > 0) {
+      await message.channel.send({
+        components: buildServerRows(secondBatch),
+      });
+    }
+    return;
+  }
+
   if (content !== `${PREFIX}hyperlink`) return;
 
   // Build the embed that prompts the user to submit a link
@@ -293,6 +379,33 @@ client.on("interactionCreate", async (interaction) => {
       console.error("[bot] /announce error:", err.message);
       await interaction.editReply({ content: "Something went wrong sending the announcement." });
     }
+    return;
+  }
+
+  // ── Server category button pressed ──
+  if (interaction.isButton() && interaction.customId.startsWith("server_")) {
+    const serverId = interaction.customId.replace("server_", "");
+    const server   = ROBLOX_SERVERS.find((s) => s.id === serverId);
+
+    if (!server) {
+      await interaction.reply({ content: "Unknown server category.", ephemeral: true });
+      return;
+    }
+
+    const inviteLines = server.invites
+      .map((link, i) => `**${i + 1}.** ${link}`)
+      .join("\n");
+
+    const replyEmbed = new EmbedBuilder()
+      .setDescription(
+        `**<a:emoji_8:1506236357775720548> \`${server.label}\` ꜱᴇʀᴠᴇʀꜱ**\n\n${inviteLines}`
+      )
+      .setFooter({
+        text: `Requested by ${interaction.user.username}`,
+        iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+      });
+
+    await interaction.reply({ embeds: [replyEmbed], ephemeral: true });
     return;
   }
 
