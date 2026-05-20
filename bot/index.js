@@ -357,9 +357,18 @@ function buildServerRows(servers) {
   return rows;
 }
 
+// Deduplication guard — prevents double-sends if Railway briefly overlaps two instances
+const _processedMessages = new Set();
+
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.guild)     return;
+
+  // If this message ID was already handled, skip it
+  if (_processedMessages.has(message.id)) return;
+  _processedMessages.add(message.id);
+  // Evict after 10 s to prevent unbounded memory growth
+  setTimeout(() => _processedMessages.delete(message.id), 10_000);
 
   const content = message.content.trim().toLowerCase();
 
@@ -407,11 +416,16 @@ client.on("messageCreate", async (message) => {
       .setEmoji({ id: "1500695831169204295", name: "emoji_3", animated: true })
   );
 
-  await message.reply({ embeds: [embed], components: [row] });
+  await message.channel.send({ embeds: [embed], components: [row] });
 });
 
 // ── Button / Modal interactions ─────────────────────────────────────────────────
+const _processedInteractions = new Set();
+
 client.on("interactionCreate", async (interaction) => {
+  if (_processedInteractions.has(interaction.id)) return;
+  _processedInteractions.add(interaction.id);
+  setTimeout(() => _processedInteractions.delete(interaction.id), 10_000);
 
   // ── /announce slash command — open the announce modal ──
   if (interaction.isChatInputCommand() && interaction.commandName === "announce") {
