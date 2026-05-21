@@ -620,7 +620,7 @@ client.on("interactionCreate", async (interaction) => {
   ) {
     const rawUrl = interaction.fields.getTextInputValue("url_input").trim();
 
-    await interaction.deferReply({ ephemeral: false });
+    await interaction.deferReply({ ephemeral: true });
 
     try {
       const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
@@ -672,7 +672,7 @@ client.on("interactionCreate", async (interaction) => {
 
       // Send the fmt as a separate plain message so users can select & copy just the text
       await interaction.editReply({ embeds: [resultEmbed] });
-      await interaction.followUp({ content: fmt, ephemeral: false });
+      await interaction.followUp({ content: fmt, ephemeral: true });
     } catch (err) {
       console.error("[bot] hyperlink error:", err.message);
       await interaction.editReply({
