@@ -363,7 +363,7 @@ function buildServerRows(servers) {
           .setCustomId(`srv:${i + offset}`)
           .setLabel(s.label)
           .setStyle(ButtonStyle.Primary)
-          .setEmoji({ id: "1500695831169204295", name: "emoji_3", animated: true })
+          .setEmoji({ id: "1508694920972468347", name: "emoji_17", animated: true })
       )
     );
     rows.push(row);
@@ -440,7 +440,7 @@ client.on("messageCreate", async (message) => {
       .setCustomId("hyperlink_submit")
       .setLabel("ʜʏᴘᴇʀʟɪɴᴋ")
       .setStyle(ButtonStyle.Primary)
-      .setEmoji({ id: "1500695831169204295", name: "emoji_3", animated: true })
+      .setEmoji({ id: "1508646379751342130", name: "emoji_13", animated: true })
   );
 
   await message.reply({ embeds: [embed], components: [row] });
