@@ -76,7 +76,7 @@ async function getSolvedCookie(fetch) {
 
 // ── Discord client ──────────────────────────────────────────────────────────────
 // ── Welcomer config ─────────────────────────────────────────────────────────────
-const WELCOME_CHANNEL_ID = "1500720048560672869";
+const WELCOME_CHANNEL_ID = "1509360469104922735";
 const WELCOME_GIF        = "https://cdn.discordapp.com/attachments/1506434367491276812/1509041263230324856/40ed5bef-646a-4e42-92cf-cdc9908dd6f9.gif?ex=6a17bbb1&is=6a166a31&hm=0e026f50c278136c764ec4fde7d38e031b41963b455b8146a3a3024fc3e1e4d9";
 
 // ── Startup lock — refuse to run if another instance already holds the lock ──────
@@ -107,9 +107,9 @@ async function autoPurgeChannels() {
   console.log("[v0] Auto-purge started at", new Date().toISOString());
   
   const channelIds = [
-    "1500676577183268914",
-    "1500675710669553695",
-    "1500675896384688249",
+    "1509373485179211898",
+    "1509373384243548222",
+    "1509373133939937403",
   ];
 
   const startTime = Date.now();
@@ -547,6 +547,65 @@ client.on("messageCreate", async (message) => {
     return;
   }
 
+  // ── !embed ──
+  if (content === `${PREFIX}embed`) {
+    const methods = [
+      {
+        name: "TIKTOK LIVE",
+        image1: "https://cdn.discordapp.com/attachments/1506434367491276812/1509393795744137347/0361d9c7-675b-498f-b9b5-fbad64a18d19.gif?ex=6a190404&is=6a17b284&hm=a223337918022d2cf0540e3137d6f167305a501cc2477594127a6c4bcb5160ae",
+        image2: "https://cdn.discordapp.com/attachments/1506434367491276812/1509394265141415936/1773637630733-5bee7763-8a95-48c0-8857-b9f2196e8d11.gif?ex=6a190473&is=6a17b2f3&hm=2866b7b7ca9eff6d39f1ccbc30640a1ee0fa62adac8619771cf9d455c329a76b",
+        body: "**── TIKTOK LIVE ──**\n\n__**How it works**__\n- You go live on tiktok using a fake roblox giveaway video, and try to get as many viewers as possible. And you will have fake link in your tiktok bio so you get accounts\n\n__**REQUIREMENTS**__\n- For pc live you need TikTok account with live studio access\n- for mobile live you need TikTok account with mobile gaming live access\n- also this methods needs some brain, cant be a retard.\n\n__**How to get tiktok live acc**__\n- go to roblox crosstrading server and trade for one\n- use this follower botting service, to bot 1k followers only for 2$ https://yoursmm.net/\n- or use this method to easily get 1k followers in 3 days or less https://justpaste.it/follow-method\n\n__**Choosing link**__\n- go to Variares sites and then pick one of the TikTok links\n- always remember to test the link before going live\n- if link is flagged then try removing the www. Or https: from the link\n- Using Beacons.ai > you can make beacons.ai biolink to make it look more realistic. This is my beacons ai https://beacons.ai/joinadoptme you can take inspiration and then add it to your tiktok bio\n- if you cant add link to tiktok bio then make your tiktok account into business account so you can add business link\n\n__**How to go live/loop video**__\n- on pc you have to download live studio and then set it up then just pick a good video and go live\n- On mobile you have to loop the video from gallery settings atleast on android\n\n**__MUST REMEMBER THESE__**\n- When you go live ALWAYS remember to Mute your mic check tutorial on yt how to.\n- put notifications off\n- remember to blacklist bad words\n\n__**Picking game category and title**__\n- if youre on mobile then your live game category __MUST__ Be subway surfers or clash royale. On Pc it can be Roblox\n- Title can be probably anything but be careful with words like Free and Giveaway since TikTok doesnt always like them\n\n__**How long to be live for**__\n- Never be live for alot of hours UNLESS Your live is stable asf. Like having abt hundred viewers or more for hours.\n- when you start live you should do it only for 20 mins and then check to if end the live or not.\n\n__**Heres when to end and when to not to**__\n- if after 20 mins your viewers are Below 10 then end your live\n- if theyre above 10 then theres small chance of going viral\n- above 20 viewers = good chance to go viral\n- above 40 viewers is very good keep it up until they start dropping!!\n\n**__Pumping method__**\nThis is a method to TikTok Live grow viewers.\n- Basically just go live until viewers grow and when thwy drop by a bit just end the live immediatelly > and then start live almost immediatelly again and repeat this until you have stable asf live with hundreds of viewers!!!\n\n**Heres some random tutorial vids i found you can watch to learn, __MUST__ Still read full text otherwise you wont get viewers 😐**\nhttps://youtu.be/B-zZHryfuTs?si=XmrEatq2l3nyd0UP\nhttps://www.youtube.com/watch?v=RGaJMb7bRq8&t=1s"
+      },
+      {
+        name: "BUYING SELLING",
+        image1: "https://cdn.discordapp.com/attachments/1506434367491276812/1509393795744137347/0361d9c7-675b-498f-b9b5-fbad64a18d19.gif?ex=6a190404&is=6a17b284&hm=a223337918022d2cf0540e3137d6f167305a501cc2477594127a6c4bcb5160ae",
+        image2: "https://cdn.discordapp.com/attachments/1506434367491276812/1509394265141415936/1773637630733-5bee7763-8a95-48c0-8857-b9f2196e8d11.gif?ex=6a190473&is=6a17b2f3&hm=2866b7b7ca9eff6d39f1ccbc30640a1ee0fa62adac8619771cf9d455c329a76b",
+        body: "**── BUYING/SELLING METH ──**\n\n**You need to have an PC it wont work otherwise cuz it doesnt let you hide the browser domain on the top on mobile! The Method goes like this: You go into Discord Roblox Selling Servers and look for an account you like and act like your gonna buy. Ask them if they can let you log in to check it. (you will log in on your bea* link with the acc) Tell em your gonna do it on stream if they arent letting you. Now to hide the Domain up top it will say: .py / We dont want that! To Cover it up just go up to where the domain is and Type : roblox.com/login (look attachments) (dont hit enter js leave it there) Then you can proceed to login there! Now if they have a pin binded to the account you can ask them and they will sometimes give it to you (tell em you wont be able to do any stupid shit cuz they prob have 2fa on there. / But that wont bother you cuz when they give you the pin the system automatically cracks it! and will add auth or change age) Now just log em do your stuff and your good.**\n\n**Tell em this when your gonna ask to login:**\n\\`\\`\\`Umm is there anyway i can login to the account on screenshare i will not go in game or anything i will just be in homescreen the sec im in just give me 20s to send the money\\`\\`\\`\n\n**You can spam this to get dms:**\n\\`\\`\\`# Lf korblox or headless accounts willing to go first after i log in to see that it has email verified 2 step and all of the items Also looking for mid accounts wtih 5k+ robux\n# Payments in : Crypto, Cashapp, Paypal, ApplePay, Giftcards\\`\\`\\`\n\n**Fake paypal error to show**\nhttps://cdn.discordapp.com/attachments/1308658524703817818/1478981619925782629/image-4.png?ex=69aa6078&is=69a90ef8&hm=66bd1b859bba2e3f13e5d0ad4d89804961b1a8f50b4d80511db4c5e562841ca1\n\n> Servers to do ts in:\n> https://discord.gg/Jq2YTzWtKA\n> https://discord.gg/DN92bfYThS"
+      },
+      {
+        name: "DUALHOOK",
+        image1: "https://cdn.discordapp.com/attachments/1506434367491276812/1509393795744137347/0361d9c7-675b-498f-b9b5-fbad64a18d19.gif?ex=6a190404&is=6a17b284&hm=a223337918022d2cf0540e3137d6f167305a501cc2477594127a6c4bcb5160ae",
+        image2: "https://cdn.discordapp.com/attachments/1506434367491276812/1509394265141415936/1773637630733-5bee7763-8a95-48c0-8857-b9f2196e8d11.gif?ex=6a190473&is=6a17b2f3&hm=2866b7b7ca9eff6d39f1ccbc30640a1ee0fa62adac8619771cf9d455c329a76b",
+        body: "**── DUALHOOK METH ──**\n\n**Step 1: Create a server & the dualhook link in the website where you are teaching members how to get hits at the same time, you'll be stealing their hits**\n\n**Step 2: Head over to**\nhttps://discord.com/template/Cg2G6AdH6ZkR\n**Doesnt have to be exactly like that but, it does have to have the server aspects.**\n\n**Step 3: Once you finished with your whole server and done with it, try to partner with as many servers as you can, invite your friends, and even steal members out of different servers secretly**\n\n**Step 4: You do want to have your server active, add mods, admins, and maybe even a co-owner!!**\n\n**Tutorial:**\nhttps://streamable.com/u88d7u"
+      },
+      {
+        name: "TIKTOK NOT LIVE",
+        image1: "https://cdn.discordapp.com/attachments/1506434367491276812/1509393795744137347/0361d9c7-675b-498f-b9b5-fbad64a18d19.gif?ex=6a190404&is=6a17b284&hm=a223337918022d2cf0540e3137d6f167305a501cc2477594127a6c4bcb5160ae",
+        image2: "https://cdn.discordapp.com/attachments/1506434367491276812/1509394265141415936/1773637630733-5bee7763-8a95-48c0-8857-b9f2196e8d11.gif?ex=6a190473&is=6a17b2f3&hm=2866b7b7ca9eff6d39f1ccbc30640a1ee0fa62adac8619771cf9d455c329a76b",
+        body: "**── TIKTOK (NOT LIVE) METH ──**\n\n**Create an tiktok account related to the game you want**\n\n**Change your account into a business acc so you can put links on your bio**\n\n**Enjoy, no need to livestream**\n\nhttps://cdn.discordapp.com/attachments/1277482286232637544/1284084370898157578/lv_0_20240831184505.mp4?ex=673866c3&is=67371543&hm=95ece82de1fe102a7b89611da3f3915dc4baa2c94a5c9dc86545c8283c8d750f"
+      }
+    ];
+
+    for (const method of methods) {
+      try {
+        // Create thread with auto-archive after 1 hour but not locked
+        const thread = await message.channel.threads.create({
+          name: method.name,
+          autoArchiveDuration: 60,
+        });
+
+        // First embed - only image
+        const firstEmbed = new EmbedBuilder()
+          .setImage(method.image1)
+          .setColor("#000000");
+
+        // Second embed - content with image
+        const secondEmbed = new EmbedBuilder()
+          .setDescription(method.body)
+          .setImage(method.image2)
+          .setColor("#000000");
+
+        await thread.send({ embeds: [firstEmbed] });
+        await thread.send({ embeds: [secondEmbed] });
+      } catch (err) {
+        console.log(`[v0] Error creating thread for ${method.name}:`, err.message);
+      }
+    }
+
+    await message.reply({ content: "Method embeds created successfully!", ephemeral: true });
+    return;
+  }
+
   // ── !ticket ──
   if (content === `${PREFIX}ticket`) {
     const ticketEmbed = new EmbedBuilder()
@@ -757,6 +816,10 @@ client.on("interactionCreate", async (interaction) => {
           {
             id: interaction.guild.roles.everyone.id,
             deny: ["ViewChannel"],
+          },
+          {
+            id: client.user.id,
+            allow: ["ViewChannel", "SendMessages", "ReadMessageHistory", "ManageMessages"],
           },
           {
             id: interaction.user.id,
