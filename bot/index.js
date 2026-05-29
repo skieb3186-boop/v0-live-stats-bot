@@ -471,7 +471,7 @@ function buildServerRows(servers) {
           .setCustomId(`srv:${i + offset}`)
           .setLabel(s.label)
           .setStyle(ButtonStyle.Primary)
-          .setEmoji({ id: "1508694920972468347", name: "emoji_17", animated: true })
+          .setEmoji({ id: "1509804158490771457", name: "emoji_17", animated: true })
       )
     );
     rows.push(row);
@@ -515,7 +515,7 @@ client.on("messageCreate", async (message) => {
         "<:emoji_14:1508646444607864872>  ᴀʟʟ ꜱᴇʀᴠᴇʀꜱ ʟɪꜱᴛ ᴛᴏ ʙᴇᴀᴍ**"
       )
       .setThumbnail("https://cdn.discordapp.com/attachments/1506891768938102947/1508616463479734312/bonsai-discord_1.gif?ex=6a163011&is=6a14de91&hm=d9c287b5c3c48aba045acc2bbbc6f815e71ccb4d8d3ad2126d2fd82c1ce684ec")
-      .setImage("https://cdn.discordapp.com/attachments/1507033407148789941/1508393791072243732/345781fe-1012-4a45-b51c-765b101eeb76.gif?ex=6a1560b0&is=6a140f30&hm=8d8c75218c86a662f5880cea94b59f716a15e885d18ab7c13fb0cad441d4baed")
+      .setImage("https://cdn.discordapp.com/attachments/1507701712327016488/1509827919705280512/a_83bbc624f3ac843c95b3387cdb7f4106.gif?ex=6a1a9853&is=6a1946d3&hm=9ae824ac32110fa5432cca99c88ee601537be2745b61ec15ac9aed54f83b0a8a&")
       .setFooter({
         text: `Requested by ${message.author.username}`,
         iconURL: message.author.displayAvatarURL({ dynamic: true }),
