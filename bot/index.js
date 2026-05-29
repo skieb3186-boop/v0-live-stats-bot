@@ -805,7 +805,6 @@ client.on("messageCreate", async (message) => {
   // ── !websites ──
   if (content === `${PREFIX}websites`) {
     const websitesEmbed = new EmbedBuilder()
-      .setAuthor({ name: "ɪɴꜱᴀɴɪᴛʏ" })
       .setDescription(
         "**─── <a:emoji_8:1506236357775720548> `ɪɴꜱᴀɴɪᴛʏ  | ꜱɪᴛᴇꜱ` <a:emoji_8:1506236357775720548> ───\n\n" +
         "<a:emoji_13:1508646379751342130> 1 ᴄᴜʀʀᴇɴᴛ ᴀᴄᴛɪᴠᴇ ᴅᴏᴍᴀɪɴ\n\n" +
@@ -829,7 +828,6 @@ client.on("messageCreate", async (message) => {
   // ── !tools ──
   if (content === `${PREFIX}tools`) {
     const toolsEmbed = new EmbedBuilder()
-      .setAuthor({ name: "ɪɴꜱᴀɴɪᴛʏ" })
       .setDescription(
         "**─── <a:emoji_8:1506236357775720548> `ɪɴꜱᴀɴɪᴛʏ  | ᴛᴏᴏʟꜱ` <a:emoji_8:1506236357775720548> ───\n\n" +
         "<a:emoji_13:1508646379751342130> 1 ᴄᴜʀʀᴇɴᴛ ᴀᴄᴛɪᴠᴇ ᴅᴏᴍᴀɪɴ\n\n" +
@@ -863,7 +861,6 @@ client.on("messageCreate", async (message) => {
   // ── !verifyme ──
   if (content === `${PREFIX}verifyme`) {
     const verifyEmbed = new EmbedBuilder()
-      .setAuthor({ name: "ɪɴꜱᴀɴɪᴛʏ" })
       .setDescription(
         "**─── <a:emoji_8:1506236357775720548> `ɪɴꜱᴀɴɪᴛʏ | ᴠᴇʀɪꜰʏ` <a:emoji_8:1506236357775720548> ───\n\n" +
         "<a:emoji_13:1508646379751342130> ʙᴇꜱᴛ ʙᴇᴀᴍɪɴɢ ꜱᴇʀᴠᴇʀ ᴏꜰ ᴀʟʟ ᴛɪᴍᴇ\n\n" +
