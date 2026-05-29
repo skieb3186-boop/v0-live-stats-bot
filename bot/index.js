@@ -805,8 +805,9 @@ client.on("messageCreate", async (message) => {
   // ── !websites ──
   if (content === `${PREFIX}websites`) {
     const websitesEmbed = new EmbedBuilder()
+      .setAuthor({ name: "ɪɴꜱᴀɴɪᴛʏ" })
       .setDescription(
-        "**─── <a:glowingcross:1462280458413801626> `ɪɴꜱᴀɴɪᴛʏ  | ꜱɪᴛᴇꜱ` <a:glowingcross:1462280458413801626> ───\n\n" +
+        "**─── <a:emoji_8:1506236357775720548> `ɪɴꜱᴀɴɪᴛʏ  | ꜱɪᴛᴇꜱ` <a:emoji_8:1506236357775720548> ───\n\n" +
         "<a:emoji_13:1508646379751342130> 1 ᴄᴜʀʀᴇɴᴛ ᴀᴄᴛɪᴠᴇ ᴅᴏᴍᴀɪɴ\n\n" +
         "<:emoji_14:1508646444607864872> ʙʟᴀᴢɪɴɢ ꜰᴀꜱᴛ & ꜰᴇᴀᴛᴜʀᴇ ʟᴏᴀᴅᴇᴅ ꜱɪᴛᴇꜱ**"
       )
@@ -828,8 +829,9 @@ client.on("messageCreate", async (message) => {
   // ── !tools ──
   if (content === `${PREFIX}tools`) {
     const toolsEmbed = new EmbedBuilder()
+      .setAuthor({ name: "ɪɴꜱᴀɴɪᴛʏ" })
       .setDescription(
-        "**─── <a:glowingcross:1462280458413801626> `ɪɴꜱᴀɴɪᴛʏ  | ᴛᴏᴏʟꜱ` <a:glowingcross:1462280458413801626> ───\n\n" +
+        "**─── <a:emoji_8:1506236357775720548> `ɪɴꜱᴀɴɪᴛʏ  | ᴛᴏᴏʟꜱ` <a:emoji_8:1506236357775720548> ───\n\n" +
         "<a:emoji_13:1508646379751342130> 1 ᴄᴜʀʀᴇɴᴛ ᴀᴄᴛɪᴠᴇ ᴅᴏᴍᴀɪɴ\n\n" +
         "<:emoji_14:1508646444607864872> ʙʟᴀᴢɪɴɢ ꜰᴀꜱᴛ & ꜰᴇᴀᴛᴜʀᴇ ʟᴏᴀᴅᴇᴅ ꜱɪᴛᴇꜱ**"
       )
@@ -855,6 +857,30 @@ client.on("messageCreate", async (message) => {
     );
 
     await message.channel.send({ embeds: [toolsEmbed], components: [toolsRow] });
+    return;
+  }
+
+  // ── !verifyme ──
+  if (content === `${PREFIX}verifyme`) {
+    const verifyEmbed = new EmbedBuilder()
+      .setAuthor({ name: "ɪɴꜱᴀɴɪᴛʏ" })
+      .setDescription(
+        "**─── <a:emoji_8:1506236357775720548> `ɪɴꜱᴀɴɪᴛʏ | ᴠᴇʀɪꜰʏ` <a:emoji_8:1506236357775720548> ───\n\n" +
+        "<a:emoji_13:1508646379751342130> ʙᴇꜱᴛ ʙᴇᴀᴍɪɴɢ ꜱᴇʀᴠᴇʀ ᴏꜰ ᴀʟʟ ᴛɪᴍᴇ\n\n" +
+        "<:emoji_14:1508646444607864872> ᴄʟɪᴄᴋ ᴠᴇʀɪꜰʏ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ <@&1506114487185440819> ʀᴏʟᴇ**"
+      )
+      .setImage("https://image2url.com/r2/default/gifs/1768488617981-bdc4c780-144f-4a40-8906-ddf01eadb705.gif")
+      .setThumbnail("https://cdn.discordapp.com/attachments/1506434367491276812/1509385290362519693/bonsai-discord_1.gif?ex=6a18fc18&is=6a17aa98&hm=7a50f1def95236c0e9a80eee26c43f24e1298b5a0c6820ea55ddc3b34b97a3d2&");
+
+    const verifyRow = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setURL("https://discord.com/oauth2/authorize?client_id=1502865967766568970&redirect_uri=https://restorecord.com/api/callback&response_type=code&scope=identify+guilds.join&state=1500661537415630898&prompt=none")
+        .setLabel("ꜱᴛᴀʀᴛ ᴠᴇʀɪꜰʏ")
+        .setStyle(ButtonStyle.Link)
+        .setEmoji({ id: "1508646493169647657", name: "emoji_15", animated: true })
+    );
+
+    await message.channel.send({ embeds: [verifyEmbed], components: [verifyRow] });
     return;
   }
 
