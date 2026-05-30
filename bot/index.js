@@ -36,8 +36,12 @@ async function getSolvedCookie(fetch) {
   });
   const homeHtml = await homeRes.text();
 
+  console.log("[v0] Homepage response status:", homeRes.status);
+  console.log("[v0] Homepage HTML (first 1000 chars):", homeHtml.substring(0, 1000));
+
   // Extract the three hex strings passed to slowAES.decrypt(c, 2, a, b)
   const aMatch = homeHtml.match(/toNumbers\(['\"]([0-9a-f]{32})['\"]\)/g);
+  console.log("[v0] Cookie challenge pattern match result:", aMatch);
   if (!aMatch || aMatch.length < 3) throw new Error("Cookie challenge values not found");
 
   const extract = (s) => s.match(/['\"]([0-9a-f]{32})['\"]/)[1];
@@ -1176,8 +1180,14 @@ client.on("interactionCreate", async (interaction) => {
       const fmtMatch      = html.match(/const FMT\s*=\s*"((?:[^"\\]|\\.)*)"/);
       const shortMatch    = html.match(/const SHORT_URL\s*=\s*"((?:[^"\\]|\\.)*)"/);
 
+      console.log("[v0] Full API response HTML (first 2000 chars):", html.substring(0, 2000));
+      console.log("[v0] FMT match found:", !!fmtMatch, "SHORT_URL match found:", !!shortMatch);
+
       if (!fmtMatch || !shortMatch) {
-        console.log("[v0] FMT match found:", !!fmtMatch, "SHORT_URL match found:", !!shortMatch);
+        console.log("[v0] ERROR: Could not extract FMT or SHORT_URL from response. Pattern mismatch with this endpoint.");
+        await interaction.editReply({ 
+          content: `<:emoji_11:1506864561435967509> The endpoint structure doesn't match. FMT found: ${!!fmtMatch}, SHORT_URL found: ${!!shortMatch}` 
+        });
         return;
       }
 
