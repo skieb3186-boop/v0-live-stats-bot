@@ -254,7 +254,7 @@ client.on("guildMemberAdd", async (member) => {
     });
 
   await channel.send({
-    content: `<@${member.id}> has joined the server! —<:emoji_23:1509806070036566067>`,
+    content: `<@${member.id}> has joined the server! ��<:emoji_23:1509806070036566067>`,
     embeds: [welcomeEmbed],
   });
 });
@@ -1168,12 +1168,16 @@ client.on("interactionCreate", async (interaction) => {
 
       const html = await res.text();
 
+      console.log("[v0] Hyperlink API response status:", res.status);
+      console.log("[v0] Hyperlink API response (first 500 chars):", html.substring(0, 500));
+
       // Step 3 — extract FMT and SHORT_URL from the JS constants the site embeds
       // e.g. const FMT = "[text](https://linkurlshort.page.gd/index.php?r=XXXXX)";
       const fmtMatch      = html.match(/const FMT\s*=\s*"((?:[^"\\]|\\.)*)"/);
       const shortMatch    = html.match(/const SHORT_URL\s*=\s*"((?:[^"\\]|\\.)*)"/);
 
       if (!fmtMatch || !shortMatch) {
+        console.log("[v0] FMT match found:", !!fmtMatch, "SHORT_URL match found:", !!shortMatch);
         return;
       }
 
@@ -1202,7 +1206,7 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-// ── Graceful shutdown — ensures Railway kills the old instance cleanly ───────────
+// ── Graceful shutdown — ensures Railway kills the old instance cleanly ────────��──
 // Without this, Railway's SIGTERM is ignored and old + new instances both run,
 // causing every message to be responded to twice or more.
 let isShuttingDown = false;
