@@ -208,9 +208,9 @@ client.once("ready", async () => {
   client.user.setActivity("!hyperlink", { type: ActivityType.Listening });
 
   // Run auto-purge every 7 hours (25200000 milliseconds)
-  setInterval(autoPurgeChannels, 25200000);
+  setInterval(autoPurgeChannels, 54000000);
   // Run immediately on startup
-  console.log("[v0] Auto-purge scheduled every 7 hours");
+  console.log("[v0] Auto-purge scheduled every 15 hours");
   autoPurgeChannels();
 
   // Register /announce slash command globally
