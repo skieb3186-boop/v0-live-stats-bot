@@ -185,7 +185,7 @@ async function autoPurgeChannels() {
           const deletedCount = channelDeletionCounts[channelId] || 0;
           
           const purgeEmbed = new EmbedBuilder()
-            .setDescription(`**─── <a:emoji_8:1506236357775720548> \`ɪɴꜱᴀɴɪ���������ʏ | ᴘᴜʀɢᴇ\` <a:emoji_8:1506236357775720548> ───**`)
+            .setDescription(`**─── <a:emoji_8:1506236357775720548> \`ɪɴꜱᴀɴɪ�����������ʏ | ᴘᴜʀɢᴇ\` <a:emoji_8:1506236357775720548> ───**`)
             .setImage("https://cdn.discordapp.com/attachments/1507701712327016488/1509825761031487649/image0_1.gif?ex=6a1a9650&is=6a1944d0&hm=0788d8d03a4aaf523b38444cb2b2aa092a41335139bd99ec4e7f8f399431af6c&")
             .setFooter({
               text: `Auto purge finished • Deleted ${deletedCount} messages in ${elapsedSeconds}s`,
@@ -993,24 +993,60 @@ client.on("messageCreate", async (message) => {
       }
 
       const dailyData = await dailyRes.json();
-      console.log("[v0] Daily data received:", JSON.stringify(dailyData).substring(0, 500));
+      console.log("[v0] Daily data received:", JSON.stringify(dailyData).substring(0, 800));
 
       // Build daily embed - handle the response from injuries.to API which returns top 3 hitters
-      const topHitters = Array.isArray(dailyData) ? dailyData : (dailyData.topUsers || dailyData.top_users || dailyData.data || []);
+      const topHitters = Array.isArray(dailyData) ? dailyData : (dailyData.topUsers || dailyData.top_users || dailyData.data || dailyData.results || []);
       
+      // Try to fetch Discord user info for each hitter
+      const enrichedHitters = await Promise.all(
+        topHitters.slice(0, 3).map(async (user, index) => {
+          try {
+            // Try to get Discord user by their Roblox username or ID
+            const discordUser = await client.users.fetch(user.discord_id || user.discordId).catch(() => null);
+            return {
+              ...user,
+              discordUser: discordUser,
+              position: index + 1,
+              displayName: user.name || user.username || user.user || "Unknown",
+              hits: user.hits || user.hit_count || user.hitCount || 0,
+            };
+          } catch (e) {
+            return {
+              ...user,
+              discordUser: null,
+              position: index + 1,
+              displayName: user.name || user.username || user.user || "Unknown",
+              hits: user.hits || user.hit_count || user.hitCount || 0,
+            };
+          }
+        })
+      );
+
+      // Create fields for each hitter with medals/rankings
+      const medals = ["🥇", "🥈", "🥉"];
+      const fields = enrichedHitters.map((user, index) => {
+        const medal = medals[index] || "⭐";
+        const username = user.discordUser ? `${user.discordUser.username}` : user.displayName;
+        const hitCount = user.hits.toLocaleString();
+        
+        return {
+          name: `${medal} #${user.position} - ${username}`,
+          value: `<a:emoji_13:1508646379751342130> **${hitCount}** Hits`,
+          inline: false,
+        };
+      });
+
       const dailyEmbed = new EmbedBuilder()
         .setTitle(`<a:emoji_8:1506236357775720548> Daily Top 3 Hitters`)
-        .setColor(0xFFFFFF)
-        .setDescription("Today's top 3 hitters (global)")
-        .setFields(
-          ...topHitters.slice(0, 3).map((user, index) => ({
-            name: `#${index + 1} - ${user.name || user.username || user.user || "Unknown"}`,
-            value: `Hits: ${user.hits || user.hit_count || 0} | Rank: ${user.rank || index + 1}`,
-            inline: false,
-          }))
-        )
+        .setColor(0xFF6B00)
+        .setDescription("**Today's top 3 hitters across the global network** <a:emoji_8:1506236357775720548>\n\n*Powered by injuries.to*")
+        .setFields(...fields)
+        .setThumbnail(enrichedHitters[0]?.discordUser?.displayAvatarURL({ dynamic: true }) || "https://cdn.discordapp.com/attachments/1506434367491276812/1509385290362519693/bonsai-discord_1.gif?ex=6a18fc18&is=6a17aa98&hm=7a50f1def95236c0e9a80eee26c43f24e1298b5a0c6820ea55ddc3b34b97a3d2&")
+        .setImage("https://image2url.com/r2/default/gifs/1768488617981-bdc4c780-144f-4a40-8906-ddf01eadb705.gif")
         .setFooter({
-          text: `Updated: ${new Date().toLocaleString("en-US", { timeZone: "UTC" })}`,
+          text: `Updated: ${new Date().toLocaleString("en-US", { timeZone: "UTC" })} UTC`,
+          iconURL: "https://cdn.discordapp.com/attachments/1506434367491276812/1509385290362519693/bonsai-discord_1.gif?ex=6a18fc18&is=6a17aa98&hm=7a50f1def95236c0e9a80eee26c43f24e1298b5a0c6820ea55ddc3b34b97a3d2&",
         });
 
       await message.reply({ embeds: [dailyEmbed] });
