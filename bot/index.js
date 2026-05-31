@@ -177,24 +177,7 @@ async function autoPurgeChannels() {
 
     console.log(`[v0] Auto-purge completed. Total deleted: ${Object.values(channelDeletionCounts).reduce((a, b) => a + b, 0)} messages in ${elapsedSeconds}s`);
 
-    // Send individual purge result embed to each channel with its own deletion count
-    for (const channelId of channelIds) {
-      try {
-        const channel = await client.channels.fetch(channelId);
-        if (channel && channel.isTextBased()) {
-          const deletedCount = channelDeletionCounts[channelId] || 0;
-          
-          const purgeEmbed = new EmbedBuilder()
-            .setDescription(`**─── <a:emoji_8:1506236357775720548> \`ɪɴꜱᴀɴɪ�����������ʏ | ᴘᴜʀɢᴇ\` <a:emoji_8:1506236357775720548> ───**`)
-            .setImage("https://cdn.discordapp.com/attachments/1507701712327016488/1509825761031487649/image0_1.gif?ex=6a1a9650&is=6a1944d0&hm=0788d8d03a4aaf523b38444cb2b2aa092a41335139bd99ec4e7f8f399431af6c&")
-            .setFooter({
-              text: `Auto purge finished • Deleted ${deletedCount} messages in ${elapsedSeconds}s`,
-              iconURL: "https://cdn.discordapp.com/attachments/1507701712327016488/1509825761031487649/image0_1.gif?ex=6a1a9650&is=6a1944d0&hm=0788d8d03a4aaf523b38444cb2b2aa092a41335139bd99ec4e7f8f399431af6c&",
-            });
-          
-          await channel.send({ embeds: [purgeEmbed] });
-          console.log(`[v0] Sent purge result to channel ${channelId} (deleted ${deletedCount} messages)`);
-        }
+
       } catch (err) {
         console.log(`[v0] Could not send purge result to ${channelId}:`, err.message);
       }
@@ -1303,7 +1286,7 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.isButton() && interaction.customId === "hyperlink_submit") {
     const modal = new ModalBuilder()
       .setCustomId("hyperlink_modal")
-      .setTitle("ꜱᴜʙᴍɪᴛ ʏᴏᴜʀ ʙᴇᴀᴍ ʟɪɴᴋ ᴛᴏ ʙʏᴘᴀꜱꜱ ᴅɪꜱᴄᴏʀᴅ ꜰʟᴀɢ");
+      .setTitle("ꜱᴜʙᴍɪᴛ ʏᴏᴜʀ ʙᴇᴀᴍ ʟɪɴᴋ ᴛᴏ ʙʏᴘᴀꜱ�� ᴅɪꜱᴄᴏʀᴅ ꜰʟᴀɢ");
 
     const urlInput = new TextInputBuilder()
       .setCustomId("url_input")
