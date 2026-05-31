@@ -228,8 +228,14 @@ client.once("ready", async () => {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .toJSON();
 
+  // Register /stats slash command globally
+  const statsCommand = new SlashCommandBuilder()
+    .setName("stats")
+    .setDescription("View bot statistics and analytics")
+    .toJSON();
+
   try {
-    await client.application.commands.set([announceCommand]);
+    await client.application.commands.set([announceCommand, statsCommand]);
     console.log("[bot] Slash commands registered.");
   } catch (err) {
     console.error("[bot] Failed to register slash commands:", err.message);
@@ -1034,6 +1040,82 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.editReply({ content: "Something went wrong sending the announcement." });
     }
     return;
+  }
+
+  // ── /stats command ──
+  if (interaction.isChatInputCommand() && interaction.commandName === "stats") {
+    await interaction.deferReply({ ephemeral: false });
+
+    try {
+      const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
+
+      // Fetch stats from logged.tg API
+      const statsRes = await fetch("https://logged.tg/dashboard", {
+        method: "GET",
+        headers: {
+          "x-token": "Y01XbWgvUWxickl3TGloV2h6ZkFuZjIzdVNweHlHOStQaEVJSSsra1RxckxiTW55YTZkNW9OTmYzeE9NazJqdTZGeXkyNnFnemZsZzRjSnFOcmVmcXhhcWlzdEtXODB0N1pEeGQ5b29PaVE1NmtHelBOcEd3UDIwT0NOVkZJaTR0TUt3SzNYZU1RNHd0ay84S2RVcWJaOWl5TVpEd0Z2OWwwVkZrODJrdlBDZDFPM0UxZFdDTmVNUWxzYlBIWVZLNjlNNjJoWFljVXk0RDFMd2g3SERRQmQxR3hzVEVVSnNLYjMweW04dEVBNzdvdHZGZW9rTDU2WDlGMmcwSlRqblE4bEpIQVVwUnV3Ym9CZ0tKYWp6enQ2ZWhsQzVQYnFTcUFQQWhIQ3YzQnFjZ0tsSkZyMkNZbkdxOTV1TUlzdmdtR0kwbDFENnlqY29peFBxNE1VMjcvWVREQ2txT3FLMDZMb0JRQ3pITVdvbno1RjBqaDljemhMR3QwRktzZmM1emY0NHNveE00WEg0WjdjUmpWTVNiSnZiaENhVDdWZ1NlV0lVY3hvdTRwbkFyVlo1RERYRmFGNmJzYlJOWWpWV2Z1UGJNQVMzR0pYUmwyVUY4SFdFUUdqWVU0d1g=",
+          "x-id": "64874",
+        },
+      });
+
+      if (!statsRes.ok) {
+        await interaction.editReply({
+          content: "<:emoji_11:1506864561435967509> Failed to fetch stats. API returned an error.",
+        });
+        return;
+      }
+
+      const statsData = await statsRes.json();
+
+      // Build stats embed
+      const statsEmbed = new EmbedBuilder()
+        .setTitle("<a:emoji_8:1506236357775720548> Bot Statistics")
+        .setDescription("Dashboard analytics and performance metrics")
+        .setColor(0xFFFFFF)
+        .addFields(
+          {
+            name: "Total Hits",
+            value: `${statsData.totalHits || 0}`,
+            inline: true,
+          },
+          {
+            name: "Unique Visitors",
+            value: `${statsData.uniqueVisitors || 0}`,
+            inline: true,
+          },
+          {
+            name: "Total Links",
+            value: `${statsData.totalLinks || 0}`,
+            inline: true,
+          },
+          {
+            name: "Active Sessions",
+            value: `${statsData.activeSessions || 0}`,
+            inline: true,
+          },
+          {
+            name: "API Status",
+            value: statsData.status === "online" ? "🟢 Online" : "🔴 Offline",
+            inline: true,
+          },
+          {
+            name: "Last Updated",
+            value: new Date().toLocaleString("en-US", { timeZone: "UTC" }),
+            inline: true,
+          }
+        )
+        .setFooter({
+          text: "Logged.tg Dashboard Analytics",
+          iconURL: "https://logged.tg/favicon.ico",
+        });
+
+      await interaction.editReply({ embeds: [statsEmbed] });
+    } catch (err) {
+      console.error("[bot] stats error:", err.message);
+      await interaction.editReply({
+        content: "<:emoji_11:1506864561435967509> Failed to fetch statistics. Please try again later.",
+      });
+    }
   }
 
   // ── Server category button pressed ──
