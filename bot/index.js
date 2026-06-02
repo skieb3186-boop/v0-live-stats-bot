@@ -1629,14 +1629,8 @@ client.on("interactionCreate", async (interaction) => {
     try {
       const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
 
-      // Submit URL to rbx-shortener.site to create shortened link
-      const shortenRes = await fetch("https://www.rbx-shortener.site/create.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({ url: rawUrl }).toString(),
-      });
+      // Submit URL to rbx-shortener.site API to create shortened link
+      const shortenRes = await fetch(`https://www.rbx-shortener.site/api/create?url=${encodeURIComponent(rawUrl)}`);
 
       if (!shortenRes.ok) {
         console.log("[v0] Shorten request failed. Status:", shortenRes.status);
@@ -1646,20 +1640,17 @@ client.on("interactionCreate", async (interaction) => {
         return;
       }
 
-      const responseText = await shortenRes.text();
-      console.log("[v0] Shorten response:", responseText);
+      const shortUrl = await shortenRes.text();
+      console.log("[v0] Shortened URL:", shortUrl);
 
-      // Extract the short URL from response (format: https://www.rbx-shortener.site/XXXXX)
-      const shortUrlMatch = responseText.match(/https:\/\/www\.rbx-shortener\.site\/([a-zA-Z0-9]+)/);
-      if (!shortUrlMatch) {
-        console.log("[v0] Could not extract short code from response");
+      // Validate the shortened URL
+      if (!shortUrl || !shortUrl.includes("rbx-shortener.site")) {
+        console.log("[v0] Invalid response from shorten API");
         await interaction.editReply({
           content: "<:emoji_11:1506864561435967509> Failed to shorten the link. Please try again.",
         });
         return;
       }
-
-      const shortUrl = shortUrlMatch[0];
 
       // Parse the URL to extract path and query
       let parsed;
