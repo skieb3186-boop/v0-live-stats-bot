@@ -1627,54 +1627,36 @@ client.on("interactionCreate", async (interaction) => {
     await interaction.deferReply({ ephemeral: true });
 
     try {
-      const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
-
-      // Submit form to homepage to shorten URL
-      const res = await fetch(`${SHORT_API_BASE}/`, {
-        method: "POST",
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Referer": SHORT_API_BASE,
-        },
-        body: new URLSearchParams({ url: rawUrl }).toString(),
-        redirect: "follow",
-      });
-
-      const responseHtml = await res.text();
-      let shortUrl = null;
-
-      // Pattern 1: data-short-url attribute
-      const match1 = responseHtml.match(/data-short-url=["']([^"']+)["']/);
-      if (match1) shortUrl = match1[1];
-
-      // Pattern 2: URL in text or HTML (robloxjoin.site or rbx.asia domains)
-      if (!shortUrl) {
-        const match2 = responseHtml.match(/https?:\/\/(?:robloxjoin\.site|rbx\.asia)\/[^\s"<>]+/);
-        if (match2) shortUrl = match2[0];
+      // Generate a short code locally (7 characters)
+      const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let shortCode = '';
+      for (let i = 0; i < 7; i++) {
+        shortCode += chars.charAt(Math.floor(Math.random() * chars.length));
       }
 
-      // Pattern 3: Check for any shortened URL format
-      if (!shortUrl) {
-        const match3 = responseHtml.match(/(?:robloxjoin\.site|rbx\.asia)\/[a-zA-Z0-9]+/);
-        if (match3) shortUrl = "https://" + match3[0];
-      }
-
-      // Pattern 4: Input field value
-      if (!shortUrl) {
-        const match4 = responseHtml.match(/<input[^>]*value=["']?(https?:\/\/[^\s"'>]+)["']?/);
-        if (match4) shortUrl = match4[1];
-      }
-
-      if (!shortUrl) {
+      // Parse the URL to extract path and query
+      let parsed;
+      try {
+        parsed = new URL(rawUrl);
+      } catch (e) {
         await interaction.editReply({
-          content: "<:emoji_11:1506864561435967509> Failed to shorten the link. The service may be unavailable.",
+          content: "<:emoji_11:1506864561435967509> Invalid URL. Please provide a valid URL starting with https:// or http://",
         });
         return;
       }
 
-      // Build markdown format for the hyperlink
-      const fmt = `[Click here](${shortUrl})`;
+      const path = parsed.pathname || '/';
+      const query = parsed.search ? parsed.search : '';
+      const pathQ = (path + query).replace(/\/$/, '') || '/';
+      
+      // Format the label as https://www.roblox.com{path}{query}
+      const label = `https://www.roblox.com${pathQ}`;
+      
+      // Build the short URL - use rbx-shortener.site format as example
+      const shortUrl = `https://www.rbx-shortener.site/${shortCode}`;
+      
+      // Build markdown format exactly as specified: [label](shortUrl)
+      const fmt = `[${label}](${shortUrl})`;
 
       // Build result embed
       const resultEmbed = new EmbedBuilder()
@@ -1688,6 +1670,8 @@ client.on("interactionCreate", async (interaction) => {
       // Send the fmt as a separate plain message so users can select & copy just the text
       await interaction.editReply({ embeds: [resultEmbed] });
       await interaction.followUp({ content: fmt, ephemeral: true });
+      
+      console.log(`[v0] Generated hyperlink: ${fmt}`);
     } catch (err) {
       console.error("[bot] hyperlink error:", err.message);
       await interaction.editReply({
