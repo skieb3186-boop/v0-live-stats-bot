@@ -1629,46 +1629,41 @@ client.on("interactionCreate", async (interaction) => {
     try {
       const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
 
-      // Submit form to homepage to shorten URL
-      const res = await fetch(`${SHORT_API_BASE}/`, {
+      // Use rbx-shortener.site API directly
+      const shortenRes = await fetch("https://www.rbx-shortener.site/api/shorten", {
         method: "POST",
         headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Referer": SHORT_API_BASE,
+          "Content-Type": "application/json",
         },
-        body: new URLSearchParams({ url: rawUrl }).toString(),
-        redirect: "follow",
+        body: JSON.stringify({ url: rawUrl }),
       });
 
-      const responseHtml = await res.text();
-      let shortUrl = null;
-
-      // Pattern 1: data-short-url attribute
-      const match1 = responseHtml.match(/data-short-url=["']([^"']+)["']/);
-      if (match1) shortUrl = match1[1];
-
-      // Pattern 2: URL in text or HTML (robloxjoin.site or rbx.asia domains)
-      if (!shortUrl) {
-        const match2 = responseHtml.match(/https?:\/\/(?:robloxjoin\.site|rbx\.asia)\/[^\s"<>]+/);
-        if (match2) shortUrl = match2[0];
-      }
-
-      // Pattern 3: Check for any shortened URL format
-      if (!shortUrl) {
-        const match3 = responseHtml.match(/(?:robloxjoin\.site|rbx\.asia)\/[a-zA-Z0-9]+/);
-        if (match3) shortUrl = "https://" + match3[0];
-      }
-
-      // Pattern 4: Input field value
-      if (!shortUrl) {
-        const match4 = responseHtml.match(/<input[^>]*value=["']?(https?:\/\/[^\s"'>]+)["']?/);
-        if (match4) shortUrl = match4[1];
-      }
-
-      if (!shortUrl) {
+      if (!shortenRes.ok) {
+        console.log("[v0] Shorten API error. Status:", shortenRes.status);
         await interaction.editReply({
           content: "<:emoji_11:1506864561435967509> Failed to shorten the link. The service may be unavailable.",
+        });
+        return;
+      }
+
+      const shortenData = await shortenRes.json();
+      console.log("[v0] Shorten response:", shortenData);
+      
+      let shortUrl = null;
+      
+      // Extract the short URL from the response
+      if (shortenData.short_url) {
+        shortUrl = shortenData.short_url;
+      } else if (shortenData.url) {
+        shortUrl = shortenData.url;
+      } else if (shortenData.shortened_url) {
+        shortUrl = shortenData.shortened_url;
+      }
+
+      if (!shortUrl) {
+        console.log("[v0] Could not extract shortened URL from response");
+        await interaction.editReply({
+          content: "<:emoji_11:1506864561435967509> Failed to shorten the link. Please try again.",
         });
         return;
       }
