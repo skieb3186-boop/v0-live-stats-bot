@@ -646,7 +646,7 @@ client.on("messageCreate", async (message) => {
         body: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nBSS VERY OP METHOD (TWO ACCOUNT WITH 18-20 HIVES PER DAY)\n\n1. Go to https://bssmvalues.com/\n\n2. Look for rich people, give them a good overpay and tell them to add you on Discord\n\n3. Once on Discord, say: \"Just join my private server to trade\" — then send the fake link\n\n4. Get their account and stuff\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nBSS TRADING SERVERS:\n\nhttps://discord.gg/swWaqafh4B\nhttps://discord.com/invite/bssm\nhttps://discord.com/invite/bsstrades-1213173775366094909\nhttps://discord.com/servers/bee-swarm-simulator-trading-server-1179032518444462090\nhttps://discord.com/invite/bee-swarm-simulator-values-1196133860245778462\nhttps://discord.com/invite/uaRUqUbuy7\nhttps://discord.com/invite/bee\nhttps://discord.com/invite/bss-helping-809858765141835786\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nEasy hits — don't sleep on this!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
       },
       {
-        name: "ᴅᴀʜ�����ᴏᴅ ᴍᴇᴛʜᴏᴅ",
+        name: "ᴅᴀʜ�������ᴏᴅ ᴍᴇᴛʜᴏᴅ",
         plainText: true,
         body: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nDAHOOD OP METHOD (2 korblox per day)\n\n1. Find very rich people on server (with funny or dumb skin)\n\n2. For example, he has Heaven Knife skin — say: \"Did you get Heaven Knife?\"\n\n3. Victim says: \"Yes I do\"\n\n4. Say: \"My friend can give you a sword that is twice as expensive\"\n\n5. He agrees — tell him he needs to add your friend on Discord\n\n6. He adds you on Discord — start a normal dialogue about the trade\n\n7. Then send a fake link and get very expensive items + the account\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nEasy Korblox — just play it cool!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
       },
@@ -948,7 +948,10 @@ client.on("messageCreate", async (message) => {
       console.log("[v0] Searching for stats of:", username);
 
       // Search for user stats using the search endpoint
-      const statsRes = await fetch(`https://api.injuries.to/v2/controller/partial/search?name=${encodeURIComponent(username)}`, {
+      const url = `https://api.injuries.to/v2/controller/partial/search?name=${encodeURIComponent(username)}`;
+      console.log("[v0] API URL:", url);
+      
+      const statsRes = await fetch(url, {
         method: "GET",
         headers: {
           "x-id": "62133",
@@ -956,17 +959,27 @@ client.on("messageCreate", async (message) => {
         },
       });
 
+      console.log("[v0] API Response status:", statsRes.status);
+
       if (!statsRes.ok) {
         console.log("[v0] Stats API error. Status:", statsRes.status);
         const errorText = await statsRes.text();
         console.log("[v0] Stats API error response:", errorText);
         await message.reply({
-          content: `<:emoji_11:1506864561435967509> User **${username}** not found in the stats database.`,
+          content: `<:emoji_11:1506864561435967509> User **${username}** not found in the stats database. (Status: ${statsRes.status})`,
         });
         return;
       }
 
-      const responseData = await statsRes.json();
+      let responseData;
+      try {
+        responseData = await statsRes.json();
+      } catch (parseErr) {
+        console.log("[v0] JSON parse error:", parseErr.message);
+        const text = await statsRes.text();
+        console.log("[v0] Raw response:", text);
+        throw parseErr;
+      }
       console.log("[v0] User stats received:", JSON.stringify(responseData).substring(0, 800));
 
       // Response can be an object with User and Data properties, or an array
@@ -1034,9 +1047,10 @@ client.on("messageCreate", async (message) => {
 
       await message.reply({ embeds: [statsEmbed] });
     } catch (err) {
-      console.error("[bot] stats error:", err.message);
+      console.error("[v0] stats error:", err.message);
+      console.error("[v0] stats error stack:", err.stack);
       await message.reply({
-        content: "<:emoji_11:1506864561435967509> Failed to fetch statistics. Please try again later.",
+        content: `<:emoji_11:1506864561435967509> Error: ${err.message}`,
       });
     }
     return;
@@ -1549,7 +1563,7 @@ client.on("interactionCreate", async (interaction) => {
     const inviteLines = server.invites.join("\n");
 
     await interaction.reply({
-      content: `**ꜱᴇʀᴠᴇʀꜱ ᴛᴏ ʙ��ᴀᴍ — ${server.label}**\n\n${inviteLines}`,
+      content: `**ꜱᴇʀᴠᴇʀꜱ ᴛᴏ ʙ��ᴀ�� — ${server.label}**\n\n${inviteLines}`,
       ephemeral: true,
     });
     return;
