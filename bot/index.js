@@ -944,7 +944,6 @@ client.on("messageCreate", async (message) => {
                       const firstMention = Array.from(message.mentions.users.values())[0];
                               username = firstMention.username;
                                     }
-            }
       
       // If no mention, try to parse from command arguments (e.g., !stats jakie03909)
       if (!username) {
