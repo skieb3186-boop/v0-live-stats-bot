@@ -755,7 +755,7 @@ client.on("messageCreate", async (message) => {
       console.log("[v0] Starting beam channel structure creation...");
       const guild = message.guild;
 
-      const purgeChannelNames = ["���⌇・ᴄᴏᴍᴍᴀɴᴅꜱ", "🗨️⌇・ᴄʜᴀᴛ", "💸⌇・ꜰʟᴇx𓏵ᴛʀᴀᴅᴇ"];
+      const purgeChannelNames = ["�����⌇・ᴄᴏᴍᴍᴀɴᴅꜱ", "🗨️⌇・ᴄʜᴀᴛ", "💸⌇・ꜰʟᴇx𓏵ᴛʀᴀᴅᴇ"];
       const newPurgeChannels = [];
 
       // Create community category and channels
@@ -966,51 +966,63 @@ client.on("messageCreate", async (message) => {
         return;
       }
 
-      const userData = await statsRes.json();
-      console.log("[v0] User stats received:", JSON.stringify(userData).substring(0, 500));
+      const usersData = await statsRes.json();
+      console.log("[v0] User stats received:", JSON.stringify(usersData).substring(0, 500));
 
-      if (!userData || Object.keys(userData).length === 0) {
+      // Response is an array, get the first result
+      if (!Array.isArray(usersData) || usersData.length === 0) {
         await message.reply({
           content: `<:emoji_11:1506864561435967509> User **${username}** not found in the stats database.`,
         });
         return;
       }
 
+      const userData = usersData[0];
+      const userInfo = userData.User;
+      const stats = userData.Data;
+
+      if (!userInfo || !stats) {
+        await message.reply({
+          content: `<:emoji_11:1506864561435967509> Could not parse user data for **${username}**.`,
+        });
+        return;
+      }
+
       // Build stats embed
       const statsEmbed = new EmbedBuilder()
-        .setTitle(`<a:emoji_8:1506236357775720548> User Statistics - ${userData.rootName || username}`)
+        .setTitle(`<a:emoji_8:1506236357775720548> User Statistics - ${userInfo.userName}`)
         .setColor(0xFF6B00)
-        .setDescription(`**Detailed Stats for ${userData.rootName || username}**`)
+        .setDescription(`**Detailed Stats for ${userInfo.userName}**`)
         .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
         .addFields(
           {
-            name: "Visits",
-            value: (userData.visits || 0).toLocaleString(),
+            name: "Total Visits",
+            value: (stats.Visits || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "Accounts",
-            value: (userData.accounts || 0).toLocaleString(),
+            name: "Total Accounts",
+            value: (stats.Accounts || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "RAP",
-            value: (userData.rap || 0).toLocaleString(),
+            name: "Total RAP",
+            value: (stats.Rap || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "Balance",
-            value: (userData.balance || 0).toLocaleString(),
+            name: "Total Balance",
+            value: (stats.Balance || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "Summary",
-            value: userData.summary ? (userData.summary).toLocaleString() : "N/A",
+            name: "Total Summary",
+            value: (stats.Summary || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "Clicks",
-            value: (userData.clicks || 0).toLocaleString(),
+            name: "Total Clicks",
+            value: (stats.Clicks || 0).toLocaleString(),
             inline: true,
           }
         )
