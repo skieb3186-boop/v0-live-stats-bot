@@ -1004,7 +1004,7 @@ client.on("messageCreate", async (message) => {
         .setTitle(`<a:emoji_8:1506236357775720548> User Statistics - ${userObj.rootName || userObj.userName || username}`)
         .setColor(0xFF6B00)
         .setDescription(`**Detailed Stats for ${userObj.rootName || userObj.userName || username}**`)
-        .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
+        .setThumbnail(userObj.avatarUrl || message.author.displayAvatarURL({ dynamic: true }))
         .addFields(
           {
             name: "Total Visits",
