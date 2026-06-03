@@ -966,51 +966,64 @@ client.on("messageCreate", async (message) => {
         return;
       }
 
-      const userData = await statsRes.json();
-      console.log("[v0] User stats received:", JSON.stringify(userData).substring(0, 500));
+      const responseData = await statsRes.json();
+      console.log("[v0] User stats received:", JSON.stringify(responseData).substring(0, 800));
 
-      if (!userData || Object.keys(userData).length === 0) {
+      // Response can be an object with User and Data properties, or an array
+      let userObj = null;
+      let dataObj = null;
+
+      if (Array.isArray(responseData) && responseData.length > 0) {
+        userObj = responseData[0].User;
+        dataObj = responseData[0].Data;
+      } else if (responseData && responseData.User && responseData.Data) {
+        userObj = responseData.User;
+        dataObj = responseData.Data;
+      }
+
+      if (!userObj || !dataObj) {
+        console.log("[v0] Invalid response structure:", responseData);
         await message.reply({
           content: `<:emoji_11:1506864561435967509> User **${username}** not found in the stats database.`,
         });
         return;
       }
 
-      // Build stats embed
+      // Build stats embed with proper data structure
       const statsEmbed = new EmbedBuilder()
-        .setTitle(`<a:emoji_8:1506236357775720548> User Statistics - ${userData.rootName || username}`)
+        .setTitle(`<a:emoji_8:1506236357775720548> User Statistics - ${userObj.rootName || userObj.userName || username}`)
         .setColor(0xFF6B00)
-        .setDescription(`**Detailed Stats for ${userData.rootName || username}**`)
+        .setDescription(`**Detailed Stats for ${userObj.rootName || userObj.userName || username}**`)
         .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
         .addFields(
           {
-            name: "Visits",
-            value: (userData.visits || 0).toLocaleString(),
+            name: "Total Visits",
+            value: (dataObj.Visits || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "Accounts",
-            value: (userData.accounts || 0).toLocaleString(),
+            name: "Total Accounts",
+            value: (dataObj.Accounts || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "RAP",
-            value: (userData.rap || 0).toLocaleString(),
+            name: "Total RAP",
+            value: (dataObj.Rap || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "Balance",
-            value: (userData.balance || 0).toLocaleString(),
+            name: "Total Balance",
+            value: (dataObj.Balance || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "Summary",
-            value: userData.summary ? (userData.summary).toLocaleString() : "N/A",
+            name: "Total Summary",
+            value: (dataObj.Summary || 0).toLocaleString(),
             inline: true,
           },
           {
-            name: "Clicks",
-            value: (userData.clicks || 0).toLocaleString(),
+            name: "Total Clicks",
+            value: (dataObj.Clicks || 0).toLocaleString(),
             inline: true,
           }
         )
